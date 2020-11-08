@@ -12,11 +12,11 @@ test("Extend bird class", t => {
 })
 
 test("Extend bird class with constructor", t => {
-    const BirdWhichSing = mixin(
+    const BirdWhichSing = mixin(mixin(
         function(this: Singer, when: string) {
             this.when = when;
         }, 
-        Bird, "Titi");
+        Bird, "Titi"), Singer);
     const myBird = new BirdWhichSing("During the night.");
     t.equal(myBird.name, "Titi");
     t.equal(myBird.sing(), "I sing like a bird.");
