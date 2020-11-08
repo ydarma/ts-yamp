@@ -3,7 +3,6 @@ import { mixin } from "./mixin";
 import { Bird, Informer, Man, Singer } from "./types";
 
 test("Extend bird class", t => {
-    interface BirdWhichSing extends Bird, Singer {}
     const BirdWhichSing = mixin(Bird, Singer);
     const myBird = new BirdWhichSing("Titi");
     t.equal(myBird.name, "Titi");
@@ -13,13 +12,11 @@ test("Extend bird class", t => {
 })
 
 test("Extend bird class with constructor", t => {
-    interface BirdWhichSing extends Bird, Singer {}
-    
-    const BirdWhichSing = mixin(mixin(
-        function(this: BirdWhichSing, when: string) {
+    const BirdWhichSing = mixin(
+        function(this: Singer, when: string) {
             this.when = when;
         }, 
-        Bird, "Titi"), Singer);
+        Bird, "Titi");
     const myBird = new BirdWhichSing("During the night.");
     t.equal(myBird.name, "Titi");
     t.equal(myBird.sing(), "I sing like a bird.");
@@ -28,7 +25,6 @@ test("Extend bird class with constructor", t => {
 })
 
 test("Extend bird class with override", t => {
-    interface ManWhoSing extends Man, Informer, Singer {}
     const ManWhoSing = mixin(mixin(Man, Informer), Singer, "Every day.");
     const joe = new ManWhoSing("Joe");
     t.equal(joe.name, "Joe");
