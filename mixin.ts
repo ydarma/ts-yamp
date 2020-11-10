@@ -1,13 +1,11 @@
 export type Ctor<T, S extends unknown[]> = new (...args: S) => T;
 
 interface Mixed {
-  _okToBeMixed_(): "ok";
+  _okToBeMixed_: "ok";
 }
 
 const mixedImpl = {
-  value: function () {
-    return <const>"ok";
-  },
+  value: <const>"ok",
   writable: false,
   enumerable: false,
   configurable: false,

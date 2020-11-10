@@ -2,6 +2,12 @@ import test from "tape";
 import mixin, { mixed } from "./mixin";
 import { Bird, Informer, Man, Singer } from "./test-types";
 
+test("Mixed class", (t) => {
+  const TestMixin = mixed();
+  t.equal(new TestMixin()._okToBeMixed_, <const>"ok");
+  t.end();
+});
+
 test("Mixin class", (t) => {
   const TestMixin = mixed();
   const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
@@ -12,8 +18,9 @@ test("Mixin class", (t) => {
 });
 
 test("Mixin class with constructor", (t) => {
-  const TestMixin = mixed(function (when: string) {
-    Object.assign(this, { name: "Titi", when: when });
+  const TestMixin = mixed(function (this: Bird & Singer, when: string) {
+    this.name = "Titi";
+    this.when = when;
   });
   const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
 
