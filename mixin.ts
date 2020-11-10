@@ -1,20 +1,27 @@
-import { mixin as pmixin, constr as pconstr, Ctor, Ftor } from "./extend";
+export type Ctor<T, S extends unknown[]> = new (...args: S) => T;
+export type Ftor<T, S extends unknown[]> =
+  | Ctor<T, S>
+  | ((this: T, ...args: S) => void);
 
-export function mixin<T, S extends unknown[], U, R extends unknown[]>(
+export function mixin<T, S extends unknown[], U>(
   t: Ctor<T, S>,
-  u: Ctor<U, R>,
-  ...params: R
+  u: Ftor<U, unknown[]>
 ): Ctor<T & U, S> {
-  const fn = function (this: T & U, ...args: S) {
-    Object.assign(this, new u(...params), new t(...args));
-  };
-  return pconstr(fn, pmixin(t, u));
+  Object.getOwnPropertyNames(u.prototype).forEach((m) => {
+    if (!(m in t.prototype)) {
+      Object.defineProperty(
+        t.prototype,
+        m,
+        Object.getOwnPropertyDescriptor(u.prototype, m)
+      );
+    }
+  });
+  return t as Ctor<T & U, S>;
 }
 
-export function constr<T, S extends unknown[], R extends unknown[]>(
+export function constr<T, S extends unknown[]>(
   t: Ftor<T, S>,
-  u: Ctor<T, R>,
-  ...params: R
+  u: Ctor<T, unknown[]>
 ): Ctor<T, S> {
-  return mixin(t as Ctor<T, S>, u, ...params);
+  return mixin(t as Ctor<T, S>, u);
 }
