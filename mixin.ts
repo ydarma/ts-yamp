@@ -20,3 +20,16 @@ export function mixin<T, S extends unknown[], U, R extends unknown[] = S>(
   if (typeof constr !== "undefined") return mixin(constr as Ctor<T & U, R>, t);
   return (t as unknown) as Ctor<T & U, R>;
 }
+
+export function constr<T, S extends unknown[], U, R extends unknown[]>(
+  t: Ctor<T, S> | Ftor<T, S>,
+  u: Ctor<U, R> | Ftor<U, R>,
+  ...params: R
+): Ctor<T & U, S> {
+  const tCtor = t as Ctor<T, S>;
+  const uCtor = u as Ctor<U, R>;
+  const fn = function (this: T & U, ...args: S) {
+    Object.assign(this, new uCtor(...params), new tCtor(...args));
+  };
+  return (fn as unknown) as Ctor<T & U, S>;
+}
