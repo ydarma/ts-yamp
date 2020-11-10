@@ -1,7 +1,7 @@
 export type Ctor<T, S extends unknown[]> = new (...args: S) => T;
 
 interface Mixed {
-  _okToBeMixed_: "ok";
+  __okToBeMixed__: "ok";
 }
 
 const mixedImpl = {
@@ -15,7 +15,7 @@ export function mixed<T, S extends unknown[]>(
   t?: Ctor<T, S> | ((this: T, ...args: S) => void)
 ): Ctor<T & Mixed, S> {
   const ret = t ?? class {};
-  Object.defineProperty(ret.prototype, "_okToBeMixed_", mixedImpl);
+  Object.defineProperty(ret.prototype, "__okToBeMixed__", mixedImpl);
   return ret as Ctor<T & Mixed, S>;
 }
 

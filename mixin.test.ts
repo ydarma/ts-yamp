@@ -4,7 +4,7 @@ import { Bird, Informer, Man, Singer } from "./test-types";
 
 test("Mixed class", (t) => {
   const TestMixin = mixed();
-  t.equal(new TestMixin()._okToBeMixed_, <const>"ok");
+  t.equal(new TestMixin().__okToBeMixed__, <const>"ok");
   t.end();
 });
 
@@ -33,7 +33,7 @@ test("Mixin class with constructor", (t) => {
 
 test("Mixin class with override", (t) => {
   const TestMixin = mixed(
-    class {
+    class TestMixin {
       sing() {
         return "Each hour.";
       }
@@ -41,8 +41,8 @@ test("Mixin class with override", (t) => {
   );
   const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
 
-  const joe = new BirdWhichSing();
-  t.equal(joe.sing(), "Each hour.");
+  const myBird = new BirdWhichSing();
+  t.equal(myBird.sing(), "Each hour.");
   t.end();
 });
 
