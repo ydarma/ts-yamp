@@ -1,23 +1,21 @@
 import test from "tape";
-import mixin from "./mixin";
+import mixin, { mixed } from "./mixin";
 import { Bird, Informer, Man, Singer } from "./test-types";
 
 test("Mixin class", (t) => {
-  class TestMixin {}
+  const TestMixin = mixed();
   const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
+
   const myBird = new BirdWhichSing();
   t.equal(myBird.sing(), "I sing like a bird.");
   t.end();
 });
 
 test("Mixin class with constructor", (t) => {
-  class TestMixin {}
-
-  const birdConstructor = function (when: string) {
-    this.name = "Titi";
-    this.when = when;
-  };
-  const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer, birdConstructor);
+  const TestMixin = mixed(function (when: string) {
+    Object.assign(this, { name: "Titi", when: when });
+  });
+  const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
 
   const myBird = new BirdWhichSing("All the day.");
   t.equal(myBird.name, "Titi");
@@ -27,21 +25,19 @@ test("Mixin class with constructor", (t) => {
 });
 
 test("Mixin class with override", (t) => {
-  class TestMixin {}
+  const TestMixin = mixed();
   const ManWhoSing = mixin(mixin(mixin(TestMixin, Man), Informer), Singer);
+
   const joe = new ManWhoSing();
   t.equal(joe.sing(), "I say every thing.");
   t.end();
 });
 
 test("Mixin class and instance", (t) => {
-  class TestMixin {}
-  const BirdNamedTiti = mixin(TestMixin, Bird);
-
-  const birdConstructor = function (name: string): void {
+  const TestMixin = mixed(function (name: string) {
     Object.assign(this, new Singer(), new Bird(name));
-  };
-  const BirdWhichSing = mixin(BirdNamedTiti, Singer, birdConstructor);
+  });
+  const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
 
   const myBird = new BirdWhichSing("Titi");
   t.equal(myBird.name, "Titi");
@@ -51,17 +47,10 @@ test("Mixin class and instance", (t) => {
 });
 
 test("Mixin class and instance with constructor", (t) => {
-  class TestMixin {}
-
-  const titiConstructor = function () {
-    Object.assign(this, new Bird("Titi"));
-  };
-  const BirdNamedTiti = mixin(TestMixin, Bird, titiConstructor);
-
-  const birdConstructor = function (when: string) {
-    Object.assign(this, new Singer(when), new BirdNamedTiti());
-  };
-  const BirdWhichSing = mixin(BirdNamedTiti, Singer, birdConstructor);
+  const TestMixin = mixed(function (when: string) {
+    Object.assign(this, new Singer(when), new Bird("Titi"));
+  });
+  const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
 
   const myBird = new BirdWhichSing("During the night.");
   t.equal(myBird.name, "Titi");
@@ -71,13 +60,11 @@ test("Mixin class and instance with constructor", (t) => {
 });
 
 test("Mixin class and instance with override", (t) => {
-  class TestMixin {}
-  const ManNamedJoe = mixin(TestMixin, Man);
-  const ManWhoInform = mixin(ManNamedJoe, Informer);
-  const manConstructor = function (name: string, when: string): void {
+  const TestMixin = mixed(function (name: string, when?: string) {
     Object.assign(this, new Singer(when), new Informer(), new Man(name));
-  };
-  const ManWhoSing = mixin(ManWhoInform, Singer, manConstructor);
+  });
+  const ManWhoSing = mixin(mixin(mixin(TestMixin, Man), Informer), Singer);
+
   const joe = new ManWhoSing("Joe", "Every day.");
   t.equal(joe.name, "Joe");
   t.equal(joe.sing(), "I say every thing.");

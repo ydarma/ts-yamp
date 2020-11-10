@@ -1,18 +1,30 @@
 export type Ctor<T, S extends unknown[]> = new (...args: S) => T;
-export type Ftor<T, S extends unknown[]> =
-  | Ctor<T, S>
-  | ((this: T, ...args: S) => void);
 
-export default function mixin<
-  T,
-  S extends unknown[],
-  U,
-  R extends unknown[] = S
->(
+interface Mixed {
+  _okToBeMixed_(): "ok";
+}
+
+const mixedImpl = {
+  value: function () {
+    return <const>"ok";
+  },
+  writable: false,
+  enumerable: false,
+  configurable: false,
+};
+
+export function mixed<T, S extends unknown[]>(
+  t?: Ctor<T, S> | ((this: T, ...args: S) => void)
+): Ctor<T & Mixed, S> {
+  const ret = t ?? class {};
+  Object.defineProperty(ret.prototype, "_okToBeMixed_", mixedImpl);
+  return ret as Ctor<T & Mixed, S>;
+}
+
+export default function mixin<T extends Mixed, S extends unknown[], U>(
   t: Ctor<T, S>,
-  u: Ctor<U, unknown[]>,
-  constr?: Ftor<T & U, R>
-): Ctor<T & U, R> {
+  u: Ctor<U, unknown[]>
+): Ctor<T & U, S> {
   Object.getOwnPropertyNames(u.prototype).forEach((m) => {
     if (!(m in t.prototype)) {
       Object.defineProperty(
@@ -22,6 +34,5 @@ export default function mixin<
       );
     }
   });
-  if (typeof constr !== "undefined") return mixin(constr as Ctor<T & U, R>, t);
-  return (t as unknown) as Ctor<T & U, R>;
+  return t as Ctor<T & U, S>;
 }
