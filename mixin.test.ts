@@ -1,5 +1,5 @@
 import test from "tape";
-import { mixin, constr, params } from "./mixin";
+import mixin from "./mixin";
 import { Bird, Informer, Man, Singer } from "./test-types";
 
 test("Mixin class", (t) => {
@@ -12,11 +12,13 @@ test("Mixin class", (t) => {
 
 test("Mixin class with constructor", (t) => {
   class TestMixin {}
-  const birdConstructor = function (this: Bird & Singer, when: string) {
+
+  const birdConstructor = function (when: string) {
     this.name = "Titi";
     this.when = when;
   };
   const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer, birdConstructor);
+
   const myBird = new BirdWhichSing("All the day.");
   t.equal(myBird.name, "Titi");
   t.equal(myBird.sing(), "I sing like a bird.");
@@ -34,13 +36,14 @@ test("Mixin class with override", (t) => {
 
 test("Mixin class and instance", (t) => {
   class TestMixin {}
-  const BirdNamedTiti = mixin(TestMixin, Bird, constr(TestMixin, Bird));
-  const BirdWhichSing = mixin(
-    BirdNamedTiti,
-    Singer,
-    constr(BirdNamedTiti, Singer)
-  );
-  const myBird = new BirdWhichSing([[], "Titi"]);
+  const BirdNamedTiti = mixin(TestMixin, Bird);
+
+  const birdConstructor = function (name: string): void {
+    Object.assign(this, new Singer(), new Bird(name));
+  };
+  const BirdWhichSing = mixin(BirdNamedTiti, Singer, birdConstructor);
+
+  const myBird = new BirdWhichSing("Titi");
   t.equal(myBird.name, "Titi");
   t.equal(myBird.sing(), "I sing like a bird.");
   t.equal(myBird.when, "In the morning.");
@@ -49,52 +52,33 @@ test("Mixin class and instance", (t) => {
 
 test("Mixin class and instance with constructor", (t) => {
   class TestMixin {}
-  const BirdNamedTiti = mixin(TestMixin, Bird, constr(TestMixin, Bird));
-  const birdConstructor = function (this: Bird & Singer, when: string) {
-    this.when = when;
+
+  const titiConstructor = function () {
+    Object.assign(this, new Bird("Titi"));
   };
-  const BirdWhichSing = mixin(
-    BirdNamedTiti,
-    Singer,
-    constr(birdConstructor, constr(BirdNamedTiti, Singer))
-  );
-  const myBird = new BirdWhichSing(["During the night."], [[], "Titi"]);
+  const BirdNamedTiti = mixin(TestMixin, Bird, titiConstructor);
+
+  const birdConstructor = function (when: string) {
+    Object.assign(this, new Singer(when), new BirdNamedTiti());
+  };
+  const BirdWhichSing = mixin(BirdNamedTiti, Singer, birdConstructor);
+
+  const myBird = new BirdWhichSing("During the night.");
   t.equal(myBird.name, "Titi");
   t.equal(myBird.sing(), "I sing like a bird.");
   t.equal(myBird.when, "During the night.");
   t.end();
 });
 
-test("Parameter builder", (t) => {
-  const p1 = params();
-  t.deepEqual(p1.args, []);
-  const p2 = p1.params("Hello", 1);
-  t.deepEqual(p2.args, [[], "Hello", 1]);
-  const p = params().params("Joe").params().params("Every day.");
-  t.deepEqual(p.args, [[[[], "Joe"]], "Every day."]);
-  t.end();
-});
-
-class TestMixin {}
-const ManNamedJoe = mixin(TestMixin, Man, constr(TestMixin, Man));
-const ManWhoInform = mixin(
-  ManNamedJoe,
-  Informer,
-  constr(ManNamedJoe, Informer)
-);
-const ManWhoSing = mixin(ManWhoInform, Singer, constr(ManWhoInform, Singer));
-
 test("Mixin class and instance with override", (t) => {
-  const joe = new ManWhoSing([[[], "Joe"]], "Every day.");
-  t.equal(joe.name, "Joe");
-  t.equal(joe.sing(), "I say every thing.");
-  t.equal(joe.when, "Every day.");
-  t.end();
-});
-
-test("Mixin class and instance with parameter builder", (t) => {
-  const p = params().params("Joe").params().params("Every day.");
-  const joe = new ManWhoSing(...p.args);
+  class TestMixin {}
+  const ManNamedJoe = mixin(TestMixin, Man);
+  const ManWhoInform = mixin(ManNamedJoe, Informer);
+  const manConstructor = function (name: string, when: string): void {
+    Object.assign(this, new Singer(when), new Informer(), new Man(name));
+  };
+  const ManWhoSing = mixin(ManWhoInform, Singer, manConstructor);
+  const joe = new ManWhoSing("Joe", "Every day.");
   t.equal(joe.name, "Joe");
   t.equal(joe.sing(), "I say every thing.");
   t.equal(joe.when, "Every day.");
