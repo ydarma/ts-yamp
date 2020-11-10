@@ -32,11 +32,17 @@ test("Mixin class with constructor", (t) => {
 });
 
 test("Mixin class with override", (t) => {
-  const TestMixin = mixed();
-  const ManWhoSing = mixin(mixin(mixin(TestMixin, Man), Informer), Singer);
+  const TestMixin = mixed(
+    class {
+      sing() {
+        return "Each hour.";
+      }
+    }
+  );
+  const BirdWhichSing = mixin(mixin(TestMixin, Bird), Singer);
 
-  const joe = new ManWhoSing();
-  t.equal(joe.sing(), "I say every thing.");
+  const joe = new BirdWhichSing();
+  t.equal(joe.sing(), "Each hour.");
   t.end();
 });
 
