@@ -1,4 +1,4 @@
-import { mixin as pmixin, constr as pconstr, Ctor, Ftor } from "./mixin";
+import { mixin as pmixin, Ctor, Ftor } from "./mixin";
 
 export function mixin<T, S extends unknown[], U, R extends unknown[]>(
   t: Ctor<T, S>,
@@ -8,7 +8,7 @@ export function mixin<T, S extends unknown[], U, R extends unknown[]>(
   const fn = function (this: T & U, ...args: S) {
     Object.assign(this, new u(...params), new t(...args));
   };
-  return pconstr(fn, pmixin(t, u));
+  return pmixin(t, u, fn);
 }
 
 export function constr<T, S extends unknown[], R extends unknown[]>(

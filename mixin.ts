@@ -3,10 +3,11 @@ export type Ftor<T, S extends unknown[]> =
   | Ctor<T, S>
   | ((this: T, ...args: S) => void);
 
-export function mixin<T, S extends unknown[], U>(
+export function mixin<T, S extends unknown[], U, R extends unknown[] = S>(
   t: Ctor<T, S>,
-  u: Ftor<U, unknown[]>
-): Ctor<T & U, S> {
+  u: Ctor<U, unknown[]>,
+  constr?: Ftor<T & U, R>
+): Ctor<T & U, R> {
   Object.getOwnPropertyNames(u.prototype).forEach((m) => {
     if (!(m in t.prototype)) {
       Object.defineProperty(
@@ -16,12 +17,6 @@ export function mixin<T, S extends unknown[], U>(
       );
     }
   });
-  return t as Ctor<T & U, S>;
-}
-
-export function constr<T, S extends unknown[]>(
-  t: Ftor<T, S>,
-  u: Ctor<T, unknown[]>
-): Ctor<T, S> {
-  return mixin(t as Ctor<T, S>, u);
+  if (typeof constr !== "undefined") return mixin(constr as Ctor<T & U, R>, t);
+  return (t as unknown) as Ctor<T & U, R>;
 }

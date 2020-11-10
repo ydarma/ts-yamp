@@ -3,7 +3,8 @@ import { mixin, constr } from "./mixin-instance";
 import { Bird, Informer, Man, Singer } from "./types";
 
 test("Mixin class and instance", (t) => {
-  const BirdWhichSing = mixin(mixin(class {}, Bird, "Titi"), Singer);
+  class MyMixin {}
+  const BirdWhichSing = mixin(mixin(MyMixin, Bird, "Titi"), Singer);
   const myBird = new BirdWhichSing();
   t.equal(myBird.name, "Titi");
   t.equal(myBird.sing(), "I sing like a bird.");
@@ -12,10 +13,14 @@ test("Mixin class and instance", (t) => {
 });
 
 test("Mixin class and instance with constructor", (t) => {
+  class MyMixin {}
   const birdConstructor = function (this: Bird & Singer, when: string) {
     this.when = when;
   };
-  const BirdWhichSing = constr(birdConstructor, mixin(Bird, Singer), "Titi");
+  const BirdWhichSing = constr(
+    birdConstructor,
+    mixin(mixin(MyMixin, Bird, "Titi"), Singer)
+  );
   const myBird = new BirdWhichSing("During the night.");
   t.equal(myBird.name, "Titi");
   t.equal(myBird.sing(), "I sing like a bird.");
@@ -24,8 +29,9 @@ test("Mixin class and instance with constructor", (t) => {
 });
 
 test("Mixin class and instance with override", (t) => {
+  class MyMixin {}
   const ManWhoSing = mixin(
-    mixin(mixin(class {}, Man, "Joe"), Informer),
+    mixin(mixin(MyMixin, Man, "Joe"), Informer),
     Singer,
     "Every day."
   );
