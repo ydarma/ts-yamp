@@ -1,4 +1,4 @@
-export class Singer {
+export class Singing {
   constructor(public when: string = "In the morning.") {}
 
   sing(): string {
@@ -8,12 +8,6 @@ export class Singer {
 
 export class Bird {
   constructor(public name: string) {}
-}
-
-export class Informer {
-  sing(): string {
-    return "I say every thing.";
-  }
 }
 
 export class Man {
