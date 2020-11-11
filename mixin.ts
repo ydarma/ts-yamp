@@ -6,6 +6,11 @@ interface Mixin<T, S extends unknown[]> extends Ctor<T, S> {
   with<U>(u: Ctor<U, unknown[]>): Mixin<T & U, S>;
 }
 
+export interface Super {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  super(): any;
+}
+
 export function mixWith<T, S extends unknown[], U>(
   t: Ctor<T, S>,
   u: Ctor<U, unknown[]>
@@ -27,27 +32,30 @@ export function _mixin<T, S extends unknown[]>(
   return mixed as Mixin<T, S>;
 }
 
-class MixinBuilder<T, S extends unknown[]> {
-  constructor(private ctor: Ctor<T, S>) {}
+class MixinBuilder<T, S extends unknown[], K> {
+  constructor(private ctor: Ctor<T, S>, private proto?: Ctor<K, never>) {}
 
-  get(): Ctor<T, S> {
-    return this.ctor;
+  get(): Ctor<T & K, S> {
+    return mixer<T, S, K>(this.ctor)(this.proto);
   }
 
-  with<U>(u: Ctor<U, unknown[]>): MixinBuilder<T & U, S> {
-    return new MixinBuilder(this.mixWith(u));
+  with<U>(u: Ctor<U, unknown[]>): MixinBuilder<T, S, K & U> {
+    const proto = mixer(this.proto)(u);
+    const builder = new MixinBuilder(this.ctor, proto);
+    return builder as MixinBuilder<T & U, S, K & U>;
   }
-
-  private mixWith: <U>(u: Ctor<U, unknown[]>) => Ctor<T & U, S> = mixer(
-    this.ctor
-  );
 }
 
 export default function mixin<T, S extends unknown[]>(
   t?: Ctor<T, S> | ((this: T, ...args: S) => void)
-): MixinBuilder<T, S> {
+): MixinBuilder<T, S, Super> {
   const mixed = (t ?? class {}) as Ctor<T, S>;
-  return new MixinBuilder(mixed);
+  class superImpl implements Super {
+    super() {
+      return superImpl.prototype;
+    }
+  }
+  return new MixinBuilder(mixed, superImpl);
 }
 
 function mixer<T, S extends unknown[], U>(
