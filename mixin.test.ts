@@ -1,9 +1,9 @@
 import test from "tape";
-import mix, { mixer } from "./mixin";
+import mixin, { mixx } from "./mixin";
 import { Bird, Man, Singing } from "./test-types";
 
 test("Mixin class", (t) => {
-  const SingingBird = mixer().with(Bird).with(Singing).get();
+  const SingingBird = mixin().with(Bird).with(Singing).get();
 
   const myBird = new SingingBird();
   t.equal(myBird.sing(), "I sing like a bird.");
@@ -15,7 +15,7 @@ test("Mixin class with constructor", (t) => {
     this.name = "Titi";
     this.when = when;
   }
-  const SingingBird = mix(singingBird).with(Bird).with(Singing);
+  const SingingBird = mixin(singingBird).with(Bird).with(Singing).get();
 
   const myBird = new SingingBird("All the day.");
   t.equal(myBird.name, "Titi");
@@ -30,7 +30,7 @@ test("Mixin class with override", (t) => {
       return "Each hour.";
     }
   }
-  const SingingBird = mixer(Cuckoo).with(Bird).with(Singing).get();
+  const SingingBird = mixin(Cuckoo).with(Bird).with(Singing).get();
 
   const myBird = new SingingBird();
   t.equal(myBird.sing(), "Each hour.");
@@ -41,7 +41,7 @@ test("Mixin class and instance", (t) => {
   const singingBird = function (name: string, when?: string): void {
     Object.assign(this, new Singing(when), new Bird(name));
   };
-  const SingingBird = mix(singingBird).with(Bird).with(Singing);
+  const SingingBird = mixin(singingBird).with(Bird).with(Singing).get();
 
   const myBird = new SingingBird("Titi");
   t.equal(myBird.name, "Titi");
@@ -60,7 +60,7 @@ test("Mixin class and instance with override", (t) => {
       return "I'll say everything.";
     }
   }
-  const ManWhoSing = mix(Informer).with(Man).with(Singing);
+  const ManWhoSing = mixx(Informer).with(Man).with(Singing);
 
   const joe = new ManWhoSing("Joe", "Every day.");
   t.equal(joe.name, "Joe");

@@ -6,10 +6,7 @@ interface Mixin<T, S extends unknown[]> extends Ctor<T, S> {
   with<U>(u: Ctor<U, unknown[]>): Mixin<T & U, S>;
 }
 
-function mixin<T, S extends unknown[], U>(
-  t: Ctor<T, S>,
-  u: Ctor<U, unknown[]>
-) {
+function mix<T, S extends unknown[], U>(t: Ctor<T, S>, u: Ctor<U, unknown[]>) {
   Object.getOwnPropertyNames(u.prototype).forEach((m) => {
     if (!(m in t.prototype)) {
       Object.defineProperty(
@@ -22,13 +19,13 @@ function mixin<T, S extends unknown[], U>(
   return t as Ctor<T & U, S>;
 }
 
-export default function mix<T, S extends unknown[]>(
+export function mixx<T, S extends unknown[]>(
   t?: Ctor<T, S> | ((this: T, ...args: S) => void)
 ): Mixin<T, S> {
   const mixed = (t ?? class {}) as Ctor<T, S>;
   const withImpl = {
     value: function <U>(u: Ctor<U, unknown[]>) {
-      return mixin(mixed, u);
+      return mix(mixed, u);
     },
     writable: false,
     enumerable: false,
@@ -46,11 +43,11 @@ class MixinBuilder<T, S extends unknown[]> {
   }
 
   with<U>(u: Ctor<U, unknown[]>): MixinBuilder<T & U, S> {
-    return new MixinBuilder(mixin(this.ctor, u));
+    return new MixinBuilder(mix(this.ctor, u));
   }
 }
 
-export function mixer<T, S extends unknown[]>(
+export default function mixin<T, S extends unknown[]>(
   t?: Ctor<T, S> | ((this: T, ...args: S) => void)
 ): MixinBuilder<T, S> {
   const mixed = (t ?? class {}) as Ctor<T, S>;
