@@ -3,8 +3,7 @@ interface Ctor<T, S extends unknown[]> {
 }
 
 export interface Mixin {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  super(): any;
+  super<T>(): T;
 }
 
 export function mixWith<T, S extends unknown[], U>(
@@ -30,6 +29,10 @@ class MixinBuilder<T, S extends unknown[], K> {
     return mixWith(this.ctor, this.proto);
   }
 
+  type(): T & K {
+    return undefined;
+  }
+
   with<U>(trait: Ctor<U, unknown[]>): MixinBuilder<T, S, K & U> {
     const proto = mixWith(this.proto, trait);
     const builder = new MixinBuilder(this.ctor, proto);
@@ -37,14 +40,16 @@ class MixinBuilder<T, S extends unknown[], K> {
   }
 }
 
-export default function mixin<T, S extends unknown[] = never>(
+function mixin<T, S extends unknown[] = never>(
   ctor?: Ctor<T, S> | ((this: T, ...args: S) => void)
 ): MixinBuilder<T, S, Mixin> {
   class superImpl implements Mixin {
-    super() {
-      return superImpl.prototype;
+    super<T>() {
+      return (superImpl.prototype as unknown) as T;
     }
   }
   const mixed = (ctor ?? class {}) as Ctor<T, S>;
   return new MixinBuilder(mixed, superImpl);
 }
+
+export default mixin;

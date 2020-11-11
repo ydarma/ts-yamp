@@ -78,7 +78,7 @@ test("Mixin class and instance with override", (t) => {
     }
 
     sing(this: Informer & Mixin) {
-      const s = this.super().sing.call(this);
+      const s = this.super<Man & Singing>().sing();
       return `I'll say everything. ${s}`;
     }
   }
