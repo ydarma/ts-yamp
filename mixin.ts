@@ -13,7 +13,7 @@ export function mixWith<T, S extends unknown[], U>(
   return mixer<T, S, U>(t)(u);
 }
 
-export function mixx<T, S extends unknown[]>(
+export function _mixin<T, S extends unknown[]>(
   t?: Ctor<T, S> | ((this: T, ...args: S) => void)
 ): Mixin<T, S> {
   const mixed = (t ?? class {}) as Ctor<T, S>;

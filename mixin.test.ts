@@ -1,5 +1,5 @@
 import test from "tape";
-import mixin, { mixx } from "./mixin";
+import mixin, { _mixin } from "./mixin";
 import { Bird, Man, Singing } from "./test-types";
 
 test("Mixin class", (t) => {
@@ -60,7 +60,7 @@ test("Mixin class and instance with override", (t) => {
       return "I'll say everything.";
     }
   }
-  const ManWhoSing = mixx(Informer).with(Man).with(Singing);
+  const ManWhoSing = _mixin(Informer).with(Man).with(Singing);
 
   const joe = new ManWhoSing("Joe", "Every day.");
   t.equal(joe.name, "Joe");
