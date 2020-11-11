@@ -3,7 +3,10 @@ import mixin from "./mixin";
 import { Bird, Man, Singing } from "./test-types";
 
 test("Mixin class", (t) => {
-  const SingingBird = mixin().with(Bird).with(Singing).get();
+  const SingingBird = mixin(class {})
+    .with(Bird)
+    .with(Singing)
+    .get();
 
   const myBird = new SingingBird();
   t.equal(myBird.sing(), "I sing like a bird.");
@@ -69,7 +72,7 @@ test("Mixin class and instance with override", (t) => {
   t.end();
 });
 
-test("Mixin class and instance with override", (t) => {
+test("Mixin class with override and super call", (t) => {
   const traits = mixin.with(Man).with(Singing);
   class Informer {
     private readonly singing: Singing;

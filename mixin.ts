@@ -1,22 +1,28 @@
-interface Ctor<T, S extends unknown[]> {
-  new (...args: S): T;
-}
+type Ctor<T, S extends unknown[]> = new (...args: S) => T;
+type Ftor<T, S extends unknown[]> = (this: T, ...args: S) => void;
 
-export function mixWith<T, S extends unknown[], U>(
+function mixWith<T, S extends unknown[], U>(
   ctor: Ctor<T, S>,
   trait: Ctor<U, unknown[]>
 ): Ctor<T & U, S> {
   Object.getOwnPropertyNames(trait.prototype)
     .filter((m) => !(m in ctor.prototype))
-    .forEach((m) => {
-      Object.defineProperty(
-        ctor.prototype,
-        m,
-        Object.getOwnPropertyDescriptor(trait.prototype, m)
-      );
-    });
+    .forEach(copy);
   return ctor as Ctor<T & U, S>;
+
+  function copy(prop: string) {
+    Object.defineProperty(
+      ctor.prototype,
+      prop,
+      Object.getOwnPropertyDescriptor(trait.prototype, prop)
+    );
+  }
 }
+
+type fn = (...args: unknown[]) => unknown;
+type FunctOf<T> = {
+  [K in keyof T]: T[K] extends fn ? K : never;
+}[keyof T];
 
 class MixinBuilder<T, S extends unknown[]> {
   constructor(private ctor: Ctor<T, S>) {}
@@ -25,7 +31,7 @@ class MixinBuilder<T, S extends unknown[]> {
     return this.ctor;
   }
 
-  get super(): T {
+  get super(): Pick<T, FunctOf<T>> {
     return this.ctor.prototype;
   }
 
@@ -39,22 +45,14 @@ class MixinBuilder<T, S extends unknown[]> {
   }
 }
 
-interface Mixin {
-  <T, S extends unknown[] = never>(
-    ctor?: Ctor<T, S> | ((this: T, ...args: S) => void)
-  ): MixinBuilder<T, S>;
-  with<T, S extends unknown[] = never>(ctor: Ctor<T, S>);
+function mixin<T, S extends unknown[]>(ctor: Ftor<T, S>): MixinBuilder<T, S>;
+function mixin<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
+function mixin<T, S extends unknown[]>(ctor: never): MixinBuilder<T, S> {
+  return new MixinBuilder(ctor);
 }
 
-const mixin = function <T, S extends unknown[] = never>(
-  ctor?: Ctor<T, S> | ((this: T, ...args: S) => void)
-): MixinBuilder<T, S> {
-  const mixed = (ctor ?? class {}) as Ctor<T, S>;
-  return new MixinBuilder(mixed);
+mixin.with = function <T, S extends unknown[]>(ctor: Ctor<T, S>) {
+  return mixin(class {}).with(ctor);
 };
 
-mixin.with = function <T, S extends [] = never>(ctor: Ctor<T, S>) {
-  return mixin().with(ctor);
-};
-
-export default mixin as Mixin;
+export default mixin;
