@@ -19,7 +19,7 @@ function mixin<T, S extends unknown[], U>(
       );
     }
   });
-  return t;
+  return t as Ctor<T & U, S>;
 }
 
 export default function mix<T, S extends unknown[]>(
@@ -36,4 +36,23 @@ export default function mix<T, S extends unknown[]>(
   };
   Object.defineProperty(mixed, "with", withImpl);
   return mixed as Mixin<T, S>;
+}
+
+class MixinBuilder<T, S extends unknown[]> {
+  constructor(private ctor: Ctor<T, S>) {}
+
+  get(): Ctor<T, S> {
+    return this.ctor;
+  }
+
+  with<U>(u: Ctor<U, unknown[]>): MixinBuilder<T & U, S> {
+    return new MixinBuilder(mixin(this.ctor, u));
+  }
+}
+
+export function mixer<T, S extends unknown[]>(
+  t?: Ctor<T, S> | ((this: T, ...args: S) => void)
+): MixinBuilder<T, S> {
+  const mixed = (t ?? class {}) as Ctor<T, S>;
+  return new MixinBuilder(mixed);
 }

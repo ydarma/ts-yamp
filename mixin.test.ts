@@ -1,9 +1,9 @@
 import test from "tape";
-import mix from "./mixin";
+import mix, { mixer } from "./mixin";
 import { Bird, Man, Singing } from "./test-types";
 
 test("Mixin class", (t) => {
-  const SingingBird = mix().with(Bird).with(Singing);
+  const SingingBird = mixer().with(Bird).with(Singing).get();
 
   const myBird = new SingingBird();
   t.equal(myBird.sing(), "I sing like a bird.");
@@ -30,7 +30,7 @@ test("Mixin class with override", (t) => {
       return "Each hour.";
     }
   }
-  const SingingBird = mix(Cuckoo).with(Bird).with(Singing);
+  const SingingBird = mixer(Cuckoo).with(Bird).with(Singing).get();
 
   const myBird = new SingingBird();
   t.equal(myBird.sing(), "Each hour.");
