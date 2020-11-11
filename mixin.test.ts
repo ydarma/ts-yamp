@@ -1,5 +1,5 @@
 import test from "tape";
-import mixin, { Mixin } from "./mixin";
+import mixin from "./mixin";
 import { Bird, Man, Singing } from "./test-types";
 
 test("Mixin class", (t) => {
@@ -70,6 +70,7 @@ test("Mixin class and instance with override", (t) => {
 });
 
 test("Mixin class and instance with override", (t) => {
+  const traits = mixin.with(Man).with(Singing);
   class Informer {
     private readonly singing: Singing;
     constructor(name: string, when?: string) {
@@ -77,12 +78,12 @@ test("Mixin class and instance with override", (t) => {
       Object.assign(this, this.singing, new Man(name));
     }
 
-    sing(this: Informer & Mixin) {
-      const s = this.super<Man & Singing>().sing();
+    sing() {
+      const s = traits.super.sing();
       return `I'll say everything. ${s}`;
     }
   }
-  const ManWhoSing = mixin(Informer).with(Man).with(Singing).get();
+  const ManWhoSing = mixin(Informer).with(traits).get();
 
   const joe = new ManWhoSing("Joe", "Every day.");
   t.equal(joe.sing(), "I'll say everything. I sing like a bird.");
