@@ -1,10 +1,10 @@
 import { mixin } from "./mixin";
 
 class Singing {
-  constructor(public when: string = "In the morning.") {}
+  constructor(public when: string = "in the morning.") {}
 
   sing(): string {
-    return "I sing like a bird.";
+    return `I sing like a bird ${this.when}`;
   }
 }
 
@@ -17,8 +17,24 @@ class ABird {
     Object.assign(this, new Singing(when), new Bird(name));
   }
 }
-const SingingBird = mixin(ABird).with(Bird).with(Singing).get();
-const bird = new SingingBird("Tweety");
-console.log(bird.when);
 
-console.log(SingingBird == ABird);
+
+class Person {
+  constructor(public name: string) {}
+}
+
+const traits = mixin.with(Person).with(Singing);
+class AnHonestPerson {
+  constructor(name: string, when?: string) {
+    Object.assign(this, new Singing(when), new Bird(name));
+  }
+
+  sing(this: Person & Singing) {
+    const wrong = traits.prototype.sing.call(this);
+    return `I would like to say that ${wrong} But I don't.`;
+  }
+}
+const PersonWhoSings = mixin(AnHonestPerson).with(traits).get();
+
+const man = new PersonWhoSings("Joe");
+console.log(man.sing());
