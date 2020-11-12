@@ -1,5 +1,5 @@
 import test from "tape";
-import mixin from "./mixin";
+import { mixin } from "./mixin";
 import { Bird, Man, Singing } from "./test-types";
 
 test("Mixin class", (t) => {
@@ -41,7 +41,11 @@ test("Mixin class with override", (t) => {
 });
 
 test("Mixin class and instance", (t) => {
-  const singingBird = function (name: string, when?: string): void {
+  const singingBird = function (
+    this: Bird & Singing,
+    name: string,
+    when?: string
+  ): void {
     Object.assign(this, new Singing(when), new Bird(name));
   };
   const SingingBird = mixin(singingBird).with(Bird).with(Singing).get();

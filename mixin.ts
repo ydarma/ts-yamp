@@ -14,7 +14,10 @@ function mixWith<T, S extends unknown[], U>(
     Object.defineProperty(
       ctor.prototype,
       prop,
-      Object.getOwnPropertyDescriptor(trait.prototype, prop)
+      Object.getOwnPropertyDescriptor(
+        trait.prototype,
+        prop
+      ) as PropertyDescriptor
     );
   }
 }
@@ -35,24 +38,30 @@ class MixinBuilder<T, S extends unknown[]> {
     return this.ctor.prototype;
   }
 
-  with<U>(builder: MixinBuilder<U, unknown[]>): MixinBuilder<T & U, S>;
-  with<U>(trait: Ctor<U, unknown[]>): MixinBuilder<T & U, S>;
-  with(x) {
-    const trait = x instanceof MixinBuilder ? x.get() : x;
+  with<U, R extends unknown[]>(
+    builder: MixinBuilder<U, R>
+  ): MixinBuilder<T & U, S>;
+  with<U, R extends unknown[]>(trait: Ctor<U, R>): MixinBuilder<T & U, S>;
+  with<U, R extends unknown[]>(x: unknown) {
+    const trait = x instanceof MixinBuilder ? x.get() : (x as Ctor<U, R>);
     const ctor = mixWith(this.ctor, trait);
     const builder = new MixinBuilder(ctor);
     return builder;
   }
 }
 
-function mixin<T, S extends unknown[]>(ctor: Ftor<T, S>): MixinBuilder<T, S>;
+function mixin<T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
 function mixin<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
-function mixin<T, S extends unknown[]>(ctor: never): MixinBuilder<T, S> {
-  return new MixinBuilder(ctor);
+function mixin<T, S extends unknown[]>(ctor: unknown): MixinBuilder<T, S> {
+  return new MixinBuilder(ctor as Ctor<T, S>);
 }
 
-mixin.with = function <T, S extends unknown[]>(ctor: Ctor<T, S>) {
-  return mixin(class {}).with(ctor);
-};
+function mWith<T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
+function mWith<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
+function mWith<T, S extends unknown[]>(ctor: unknown): MixinBuilder<T, S> {
+  return mixin(class {}).with(ctor as Ctor<T, S>);
+}
 
-export default mixin;
+mixin.with = mWith;
+
+export { mixin };
