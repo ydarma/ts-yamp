@@ -18,23 +18,28 @@ class ABird {
   }
 }
 
-
 class Person {
   constructor(public name: string) {}
 }
 
-const traits = mixin.with(Person).with(Singing);
+function baseCtor(this: Person & Singing, name: string, when?: string) {
+  Object.assign(this, new Singing(when), new Bird(name));
+}
+const Base = mixin(baseCtor).with(Person).with(Singing).get();
+
 class AnHonestPerson {
+  private readonly base: Person & Singing;
+
   constructor(name: string, when?: string) {
-    Object.assign(this, new Singing(when), new Bird(name));
+    this.base = new Base(name, when);
+    Object.assign(this, this.base);
   }
 
-  sing(this: Person & Singing) {
-    const wrong = traits.prototype.sing.call(this);
+  sing() {
+    const wrong = this.base.sing();
     return `I would like to say that ${wrong} But I don't.`;
   }
 }
-const PersonWhoSings = mixin(AnHonestPerson).with(traits).get();
-
+const PersonWhoSings = mixin(AnHonestPerson).with(Base).get();
 const man = new PersonWhoSings("Joe");
 console.log(man.sing());

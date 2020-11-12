@@ -120,3 +120,25 @@ const man = new PersonWhoSings("Joe");
 console.log(man.sing());
 // I would like to say that I sing like a bird in the morning. But I don't.
 ```
+Another (maybe better) way to do the same, using an intermediate mixin :
+```typescript
+function baseCtor(this: Person & Singing, name: string, when?: string) {
+  Object.assign(this, new Singing(when), new Bird(name));
+}
+const Base = mixin(baseCtor).with(Person).with(Singing).get();
+
+class AnHonestPerson {
+  private readonly base: Person & Singing;
+
+  constructor(name: string, when?: string) {
+    this.base = new Base(name, when);
+    Object.assign(this, this.base);
+  }
+
+  sing() {
+    const wrong = this.base.sing();
+    return `I would like to say that ${wrong} But I don't.`;
+  }
+}
+const PersonWhoSings = mixin(AnHonestPerson).with(Base).get();
+```
