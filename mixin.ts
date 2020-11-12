@@ -31,7 +31,7 @@ class MixinBuilder<T, S extends unknown[]> {
     return this.ctor;
   }
 
-  get super(): Pick<T, FunctOf<T>> {
+  get prototype(): Pick<T, FunctOf<T>> {
     return this.ctor.prototype;
   }
 

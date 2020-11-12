@@ -82,7 +82,7 @@ test("Mixin class with override and super call", (t) => {
     }
 
     sing() {
-      const s = traits.super.sing();
+      const s = traits.prototype.sing();
       return `I'll say everything. ${s}`;
     }
   }
