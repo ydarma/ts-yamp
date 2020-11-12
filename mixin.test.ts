@@ -15,13 +15,13 @@ test("Mixin class", (t) => {
 
 test("Mixin class with constructor", (t) => {
   function singingBird(this: Bird & Singing, when: string) {
-    this.name = "Titi";
+    this.name = "Tweety";
     this.when = when;
   }
   const SingingBird = mixin(singingBird).with(Bird).with(Singing).get();
 
   const myBird = new SingingBird("All the day.");
-  t.equal(myBird.name, "Titi");
+  t.equal(myBird.name, "Tweety");
   t.equal(myBird.sing(), "I sing like a bird.");
   t.equal(myBird.when, "All the day.");
   t.end();
@@ -50,8 +50,8 @@ test("Mixin class and instance", (t) => {
   };
   const SingingBird = mixin(singingBird).with(Bird).with(Singing).get();
 
-  const myBird = new SingingBird("Titi");
-  t.equal(myBird.name, "Titi");
+  const myBird = new SingingBird("Tweety");
+  t.equal(myBird.name, "Tweety");
   t.equal(myBird.sing(), "I sing like a bird.");
   t.equal(myBird.when, "In the morning.");
   t.end();
