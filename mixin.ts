@@ -26,15 +26,25 @@ type fn = (...args: unknown[]) => unknown;
 type FunctOf<T> = {
   [K in keyof T]: T[K] extends fn ? K : never;
 }[keyof T];
+type ProtoOf<T> = Pick<T, FunctOf<T>>;
 
-class MixinBuilder<T, S extends unknown[]> {
+interface MixinBuilder<T, S extends unknown[]> {
+  get(): Ctor<T, S>;
+  readonly prototype: ProtoOf<T>;
+  with<U, R extends unknown[]>(
+    builder: MixinBuilder<U, R>
+  ): MixinBuilder<T & U, S>;
+  with<U, R extends unknown[]>(trait: Ctor<U, R>): MixinBuilder<T & U, S>;
+}
+
+class MixinBuilderImpl<T, S extends unknown[]> implements MixinBuilder<T, S> {
   constructor(private ctor: Ctor<T, S>) {}
 
   get(): Ctor<T, S> {
     return this.ctor;
   }
 
-  get prototype(): Pick<T, FunctOf<T>> {
+  get prototype(): ProtoOf<T> {
     return this.ctor.prototype;
   }
 
@@ -43,25 +53,37 @@ class MixinBuilder<T, S extends unknown[]> {
   ): MixinBuilder<T & U, S>;
   with<U, R extends unknown[]>(trait: Ctor<U, R>): MixinBuilder<T & U, S>;
   with<U, R extends unknown[]>(x: unknown) {
-    const trait = x instanceof MixinBuilder ? x.get() : (x as Ctor<U, R>);
+    const trait = x instanceof MixinBuilderImpl ? x.get() : (x as Ctor<U, R>);
     const ctor = mixWith(this.ctor, trait);
-    const builder = new MixinBuilder(ctor);
+    const builder = new MixinBuilderImpl(ctor);
     return builder;
   }
 }
 
-function mixin<T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
-function mixin<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
-function mixin<T, S extends unknown[]>(ctor: unknown): MixinBuilder<T, S> {
-  return new MixinBuilder(ctor as Ctor<T, S>);
+interface Mixin {
+  <T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
+  <T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
+  with<T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
+  with<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
 }
 
-function mWith<T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
-function mWith<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
-function mWith<T, S extends unknown[]>(ctor: unknown): MixinBuilder<T, S> {
-  return mixin(class {}).with(ctor as Ctor<T, S>);
+function newMixin(): Mixin {
+  function m<T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
+  function m<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
+  function m<T, S extends unknown[]>(ctor: unknown): MixinBuilder<T, S> {
+    return new MixinBuilderImpl(ctor as Ctor<T, S>);
+  }
+
+  function mWith<T, S extends unknown[]>(ftor: Ftor<T, S>): MixinBuilder<T, S>;
+  function mWith<T, S extends unknown[]>(ctor: Ctor<T, S>): MixinBuilder<T, S>;
+  function mWith<T, S extends unknown[]>(ctor: unknown): MixinBuilder<T, S> {
+    return m(class {}).with(ctor as Ctor<T, S>);
+  }
+
+  m.with = mWith;
+  return m;
 }
 
-mixin.with = mWith;
+const mixin = newMixin();
 
 export { mixin };
