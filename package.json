@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/tape -r ts-node/register './**/*.test.ts' | ./node_modules/.bin/tap-summary",
-    "lint": "./node_modules/.bin/eslint . --ext .ts"
+    "lint": "./node_modules/.bin/eslint . --ext .ts",
+    "bundle": "./node_modules/.bin/rollup -c"
   },
   "repository": {
     "type": "git",
@@ -18,13 +19,18 @@
   },
   "homepage": "https://github.com/ydarma/yamp#readme",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^16.0.0",
+    "@rollup/plugin-node-resolve": "^10.0.0",
     "@types/tape": "^4.13.0",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
+    "@wessberg/rollup-plugin-ts": "^1.3.8",
     "eslint": "^7.13.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.1.4",
     "prettier": "^2.1.2",
+    "rollup": "^2.33.1",
+    "rollup-plugin-generate-package-json": "^3.2.0",
     "tap-summary": "^4.0.0",
     "tape": "^5.0.1",
     "ts-node": "^9.0.0",

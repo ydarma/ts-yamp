@@ -1,6 +1,10 @@
 {
     "compilerOptions": {
+        "strict": true,
         "target": "ES6",
-        "esModuleInterop": true
+        "declaration": true,
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "moduleResolution": "node"
     }
 }
