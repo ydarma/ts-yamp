@@ -1,6 +1,6 @@
 {
   "name": "ts-yamp",
-  "version": "0.10.0",
+  "version": "1.0.0",
   "description": "yet another mixin pattern",
   "main": "index.js",
   "scripts": {
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ydarma/yamp.git"
+    "url": "git+https://github.com/ydarma/ts-yamp.git"
   },
   "author": "Yves Darmaillac",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ydarma/yamp/issues"
+    "url": "https://github.com/ydarma/ts-yamp/issues"
   },
-  "homepage": "https://github.com/ydarma/yamp#readme",
+  "homepage": "https://github.com/ydarma/ts-yamp#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
