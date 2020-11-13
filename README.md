@@ -5,11 +5,15 @@ TypeScript Handbook recommends two [mixin patterns](https://www.typescriptlang.o
 
 ## Install
 
+```bash
+npm i -D ts-yamp
+```
+
 ## Usage
 
 In the following example the `Bird` class includes the `Singer` mixin :
 ```typescript
-import { mixin } from "mixin";
+import { mixin } from "ts-yamp";
 
 class Singing {
   constructor(public when?: string) {}
