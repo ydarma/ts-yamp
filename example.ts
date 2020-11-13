@@ -1,21 +1,15 @@
 import { mixin } from "./mixin";
 
 class Singing {
-  constructor(public when: string = "in the morning.") {}
+  constructor(public when?: string) {}
 
   sing(): string {
-    return `I sing like a bird ${this.when}`;
+    return `I sing like a bird ${this.when ?? "in the morning."}`;
   }
 }
 
 class Bird {
   constructor(public name: string) {}
-}
-
-class ABird {
-  constructor(name: string, when?: string) {
-    Object.assign(this, new Singing(when), new Bird(name));
-  }
 }
 
 class Person {
@@ -27,11 +21,11 @@ function baseCtor(this: Person & Singing, name: string, when?: string) {
 }
 const Base = mixin(baseCtor).with(Person).with(Singing).get();
 
-class AnHonestPerson {
+class Alice {
   private readonly base: Person & Singing;
 
-  constructor(name: string, when?: string) {
-    this.base = new Base(name, when);
+  constructor(when?: string) {
+    this.base = new Base("Alice", when);
     Object.assign(this, this.base);
   }
 
@@ -40,6 +34,7 @@ class AnHonestPerson {
     return `I would like to say that ${wrong} But I don't.`;
   }
 }
-const PersonWhoSings = mixin(AnHonestPerson).with(Base).get();
-const man = new PersonWhoSings("Joe");
-console.log(man.sing());
+const AliceSings = mixin(Alice).with(Base).get();
+
+const alice = new AliceSings();
+console.log(alice.sing());

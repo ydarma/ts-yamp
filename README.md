@@ -12,10 +12,10 @@ In the following example the `Bird` class includes the `Singer` mixin :
 import { mixin } from "mixin";
 
 class Singing {
-  constructor(public when: string = "In the morning.") {}
+  constructor(public when?: string) {}
 
   sing(): string {
-    return `I sing like a bird ${this.when}`;
+    return `I sing like a bird ${this.when ?? "in the morning."}`;
   }
 }
 
@@ -43,9 +43,15 @@ const SingingBird = mixin(class box {})
 
 const bird = new SingingBird();
 ```
-Now, `SingingBird` has type `box & Bird & Singing` and references the same class as `box` declared inline in the `mixin` function call.
+Now, `SingingBird` has type `box & Bird & Singing` and references the same class as `box` declared inline in the `mixin` function call. An empty constructor function can also be passed to the `mixin` function :
+```typescript
+const t = mixin(function () {})
+  .with(Bird)
+  .with(Singing)
+  .get();
+```
 
-A constructor function may be passed to the `mixin`function to initialize the resulting class instances :
+The constructor function may be used to initialize the class instances :
 ```typescript
 function birdCtor(this: Bird & Singing, name: string, when?: string) {
   this.name = name;
@@ -81,32 +87,33 @@ class ABird {
 }
 const SingingBird = mixin(ABird).with(Bird).with(Singing).get();
 ```
-A method can be overriden, it won't be replace by mixin's method with the same name. The type of the mixins has to be annotated in the function signature :
+Methods can be overriden ; overriden methods won't be replaced by mixin's same name methods. The type of the mixins has to be annotated in the overriden methods signature :
 ```typescript
 class Person {
   constructor(public name: string) {}
 }
 
-class APerson {
-  constructor(name: string, when?: string) {
-    Object.assign(this, new Singing(when), new Bird(name));
+class Bob {
+  constructor(when?: string) {
+    Object.assign(this, new Singing(when), new Person("Bob"));
   }
 
   sing(this: Person & Singing) {
     return `I sing in the shower ${this.when}`;
   }
 }
-const PersonWhoSings = mixin(APerson).with(Person).with(Singing).get();
+const BobSings = mixin(Bob).with(Person).with(Singing).get();
 
-const person = new PersonWhoSings("Joe");
-console.log(person.sing());
+const bob = new BobSings("when the sun is shining.");
+console.log(bob.sing());
+// I sing in the shower when the sun is shining.
 ```
 If needed the minxin orignal methods may be called from the target class. The construction of the class is simply broken down into two steps :
 ```typescript
 const traits = mixin.with(Person).with(Singing);
-class AnHonestPerson {
-  constructor(name: string, when?: string) {
-    Object.assign(this, new Singing(when), new Bird(name));
+class Alice {
+  constructor(when?: string) {
+    Object.assign(this, new Singing(when), new Person("Alice"));
   }
 
   sing(this: Person & Singing) {
@@ -114,10 +121,10 @@ class AnHonestPerson {
     return `I would like to say that ${wrong} But I don't.`;
   }
 }
-const PersonWhoSings = mixin(AnHonestPerson).with(traits).get();
+const AliceSings = mixin(Alice).with(traits).get();
 
-const man = new PersonWhoSings("Joe");
-console.log(man.sing());
+const alice = new AliceSings();
+console.log(alice.sing());
 // I would like to say that I sing like a bird in the morning. But I don't.
 ```
 Another (maybe better) way to do the same, using an intermediate mixin :
@@ -127,11 +134,11 @@ function baseCtor(this: Person & Singing, name: string, when?: string) {
 }
 const Base = mixin(baseCtor).with(Person).with(Singing).get();
 
-class AnHonestPerson {
+class Alice {
   private readonly base: Person & Singing;
 
-  constructor(name: string, when?: string) {
-    this.base = new Base(name, when);
+  constructor(when?: string) {
+    this.base = new Base("Alice", when);
     Object.assign(this, this.base);
   }
 
@@ -140,5 +147,50 @@ class AnHonestPerson {
     return `I would like to say that ${wrong} But I don't.`;
   }
 }
-const PersonWhoSings = mixin(AnHonestPerson).with(Base).get();
+const AliceSings = mixin(Alice).with(Base).get();
 ```
+
+## About the implementation
+
+The implementation is widely based on the [alternative pattern presented in TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern). Type are enforced by generics in the `mixWith` function that mixes two classes :
+
+```typescript
+type Ctor<T, S extends unknown[]> = new (...args: S) => T;
+
+function mixWith<T, S extends unknown[], U>(
+  ctor: Ctor<T, S>,
+  trait: Ctor<U, unknown[]>
+): Ctor<T & U, S> {
+  Object.getOwnPropertyNames(trait.prototype)
+    .filter((m) => !(m in ctor.prototype))
+    .forEach(copy);
+  return ctor as Ctor<T & U, S>;
+
+  function copy(prop: string) {
+    Object.defineProperty(
+      ctor.prototype,
+      prop,
+      Object.getOwnPropertyDescriptor(
+        trait.prototype,
+        prop
+      ) as PropertyDescriptor
+    );
+  }
+}
+```
+
+The `mixin` method just return an object that leverage the `mixWith` method and implements the fluent interface :
+```typescript
+interface MixinBuilder<T, S extends unknown[]> {
+  get(): Ctor<T, S>;
+
+  readonly prototype: ProtoOf<T>;
+
+  with<U, R extends unknown[]>(
+    builder: MixinBuilder<U, R>
+  ): MixinBuilder<T & U, S>;
+
+  with<U, R extends unknown[]>(trait: Ctor<U, R>): MixinBuilder<T & U, S>;
+}
+```
+This makes it possible to compose several types while keeping type safety.
