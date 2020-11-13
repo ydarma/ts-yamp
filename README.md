@@ -152,7 +152,7 @@ const AliceSings = mixin(Alice).with(Base).get();
 
 ## About the implementation
 
-The implementation is widely based on the [alternative pattern presented in TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern). Type are enforced by generics in the `mixWith` function that mixes two classes :
+The implementation is largely based on the [alternative pattern presented in TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern). Type are enforced by generics in the `mixWith` function that mixes two classes :
 
 ```typescript
 type Ctor<T, S extends unknown[]> = new (...args: S) => T;
