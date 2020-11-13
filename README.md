@@ -1,7 +1,7 @@
 # yamp
 Yet another mixin pattern (in TypeScript).
 
-
+TypeScript Handbook recommends two [mixin patterns](https://www.typescriptlang.org/docs/handbook/mixins.html). In my humble opinion the [alternative pattern](https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern) is closer to what a mixin should be : prototype of mixins are included in the target class prototype. The fact is the proposed implementation is not type safe ; this project aims to build mixins this way but with type safety.
 
 ## Install
 
