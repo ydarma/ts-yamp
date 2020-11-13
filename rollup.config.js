@@ -4,9 +4,9 @@ import commonjs from "@rollup/plugin-commonjs";
 import generatePackageJson from "rollup-plugin-generate-package-json";
 
 export default {
-  input: "./mixin.ts",
+  input: "./src/mixin.ts",
   output: {
-    file: "./dist/index.js",
+    file: "./index.js",
     format: "cjs",
   },
   plugins: [

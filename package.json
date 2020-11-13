@@ -1,5 +1,5 @@
 {
-  "name": "yamp",
+  "name": "ts-yamp",
   "version": "1.0.0",
   "description": "yet another mixin pattern",
   "main": "index.js",
