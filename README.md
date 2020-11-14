@@ -19,7 +19,8 @@ class Singing {
   constructor(public when?: string) {}
 
   sing(): string {
-    return `I sing like a bird ${this.when ?? "in the morning."}`;
+    const when = this.when ?? "in the morning.";
+    return `I sing like a bird ${when}`;
   }
 }
 
@@ -153,7 +154,25 @@ class Alice {
 }
 const AliceSings = mixin(Alice).with(Base).get();
 ```
+In this example, `AliceSings` is a value, not a type. Instances will have type `Alice & Person & Singing`. This may be confusing when using it out of the module it is built. A type with the same name can be declared :
+```typescript
+const traits = mixin.with(Person).with(Singing);
+class Alice {
+  constructor(when?: string) {
+    Object.assign(this, new Singing(when), new Person("Alice"));
+  }
 
+  sing(this: AliceSings) {
+    const wrong = traits.prototype.sing.call(this);
+    return `I would like to say that ${wrong} But I don't.`;
+  }
+}
+
+interface AliceSings extends Alice, Person, Singing {}
+const AliceSings = mixin(Alice).with(traits).get();
+
+export default AliceSings
+```
 ## About the implementation
 
 The implementation is largely based on the [alternative pattern presented in TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern). Type are enforced by generics in the `mixWith` function that mixes two classes :
